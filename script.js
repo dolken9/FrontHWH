@@ -1,34 +1,52 @@
-async function fetchWeather() {
-    const input = document.getElementById("city").value;
-    const [lat, lon] = input.split(",").map(coord => coord.trim());
-    
-    if (!lat || !lon) {
-        alert("Ange latitud och longitud, separerade med ett komma.");
+const { createApp, ref, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const city = ref("");
+    const weatherData = ref([]);
+    const errorMessage = ref("");
+
+    const fetchWeather = async () => {
+      const [lat, lon] = city.value.split(",").map(coord => coord.trim());
+
+      if (!lat || !lon) {
+        errorMessage.value = "Fill in latitude and longitude, separated by a comma.";
         return;
-    }
-    
-    const url = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${lon}/lat/${lat}/data.json`;
-    
-    try {
+      }
+
+      errorMessage.value = "";
+      const url = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${lon}/lat/${lat}/data.json`;
+
+      try {
         const response = await fetch(url);
         const data = await response.json();
-        const timeseries = data.timeSeries.filter((_, index) => index % 6 === 0).slice(0, 12); 
-        
-        const weatherContainer = document.getElementById("weather-data");
-        weatherContainer.innerHTML = ""; // Rensa eventuell tidigare data
+        const timeseries = data.timeSeries.filter((_, index) => index % 6 === 0).slice(0, 12);
 
-        timeseries.forEach(item => {
-            const time = new Date(item.validTime).toLocaleString("sv-SE");
-            const temp = item.parameters.find(p => p.name === "t").values[0];
-            const precipitation = item.parameters.find(p => p.name === "pmean").values[0];
-            const windSpeed = item.parameters.find(p => p.name === "ws").values[0];
-            
-            weatherContainer.innerHTML += `<strong>${time}</strong><br>
-                                           Temperatur: ${temp}°C<br>
-                                           Nederbörd: ${precipitation} mm<br>
-                                           Vindhastighet: ${windSpeed} m/s<br><br>`;
+        weatherData.value = timeseries.map(item => {
+            return {
+            time: new Date(item.validTime).toLocaleString("sv-SE"),
+            temp: item.parameters.find(p => p.name === "t").values[0],
+            precipitation: item.parameters.find(p => p.name === "pmean").values[0],
+            windSpeed: item.parameters.find(p => p.name === "ws").values[0] ? item.parameters.find(p => p.name === "ws").values[0] : "N/A",
+            gustSpeed: item.parameters.find(p => p.name === "gust").values[0] ? item.parameters.find(p => p.name === "gust").values[0] : "N/A"
+            };
         });
-    } catch (error) {
-        console.error("Kunde inte hämta data", error);
-    }
-}
+
+      } catch (error) {
+        errorMessage.value = "Could not fetch data, try again later.";
+        console.error("Error! Something went wrong while trying to fetch the forecast:", error);
+      }
+    };
+
+    onMounted(() => {
+      fetchWeather(); 
+
+      setInterval(() => {
+        fetchWeather();
+      }, 300000);
+    });
+
+    return { city, weatherData, fetchWeather, errorMessage };
+  }
+}).mount("#app");
+

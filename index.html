@@ -5,13 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HorseWeatherHelper</title>
     <link rel="stylesheet" href="style.css" />
+    <script defer src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script defer src="script.js"></script>
   </head>
   <body>
-    <input type="text" id="city" placeholder="Input City (lat, lon)" />
-    <button onclick="fetchWeather()">Search</button>
-    <div id="weather-data">
-      <!-- Här kommer väderinformationen att visas -->
+    <div id="app">
+      <input v-model="city" placeholder="Input City (lat, lon)" />
+      <button @click="fetchWeather">Search</button>
+
+      <div v-if="weatherData.length">
+        <h3>Weather Forecast</h3>
+        <div v-for="(item, index) in weatherData" :key="index">
+          <p>{{item.time}}</p>
+          <p>Temperature: {{item.temp}} ℃</p>
+          <p>Precipitation: {{item.precipitation}} mm</p>
+          <p>Wind Speed: {{item.windSpeed}} ({{item.gustSpeed}}) m/s</p>
+        </div>
+      </div>
+      <p v-if="errorMessage">{{ errorMessage }}</p>
     </div>
   </body>
 </html>
