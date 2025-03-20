@@ -26,10 +26,12 @@ createApp({
             return {
             time: new Date(item.validTime).toLocaleString("sv-SE"),
             temp: item.parameters.find(p => p.name === "t").values[0],
-            precipitation: item.parameters.find(p => p.name === "pmean").values[0],
+            snowfallpercentage: item.parameters.find(p => p.name === "spp") ? item.parameters.find(p => p.name === "spp").values[0] : 0,
+            rainfall: item.parameters.find(p => p.name === "pmean").values[0],
             windSpeed: item.parameters.find(p => p.name === "ws").values[0] ? item.parameters.find(p => p.name === "ws").values[0] : "N/A",
-            gustSpeed: item.parameters.find(p => p.name === "gust").values[0] ? item.parameters.find(p => p.name === "gust").values[0] : "N/A"
-            };
+            gustSpeed: item.parameters.find(p => p.name === "gust").values[0] ? item.parameters.find(p => p.name === "gust").values[0] : "N/A",
+            snowfall: snowfallpercentage > 0 ? (rainfall * snowfallpercentage) / 100 : 0
+          };
         });
 
       } catch (error) {

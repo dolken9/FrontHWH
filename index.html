@@ -18,8 +18,9 @@
         <div v-for="(item, index) in weatherData" :key="index">
           <p>{{item.time}}</p>
           <p>Temperature: {{item.temp}} ℃</p>
-          <p>Precipitation: {{item.precipitation}} mm</p>
+          <p>Rain: {{item.rainfall}} mm</p>
           <p>Wind Speed: {{item.windSpeed}} ({{item.gustSpeed}}) m/s</p>
+          <p>Snowfall: {{item.snowfall}} mm</p>
         </div>
       </div>
       <p v-if="errorMessage">{{ errorMessage }}</p>
